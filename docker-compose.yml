@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SVC_ENV: 'development'
+      SVC_NAME: 'demo1'
+      SVC_PORT: '4567'
+      AWS_DEFAULT_REGION: 'local'
+    ports:
+      - 4567:4567
+    volumes:
+      - .:/srv/app

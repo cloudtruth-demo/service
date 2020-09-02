@@ -1,0 +1,43 @@
+name: CD
+
+on: [push]
+
+jobs:
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup operation environment
+        run: |
+          branch=${GITHUB_REF##*/}
+          if [[ "$branch" == "master" ]]; then
+            env="production"
+          else
+            env="development"
+          fi
+          echo "::set-env name=ENV::${env}"
+
+      - name: Set up Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+
+      - name: Install Atmos
+        run: gem install --no-document simplygenius-atmos
+
+      - name: Setup Atmos
+        run: |
+          mkdir -p config
+          curl -sfL "https://ctcaas-graph.cloudtruth.com/t/${ATMOS_YML_TID}/${ENV}" > config/atmos.yml
+
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag demo1
+
+      - name: Deploy to ECS
+        run: |
+          source <(curl -sfL https://ctcaas-graph.cloudtruth.com/t/${DEPLOY_AWS_ENV_TID}/${ENV} | cat)
+          atmos -e ${ENV} container deploy -c ctdemo-${ENV}-services -i demo1 ctdemo-${ENV}-demo1

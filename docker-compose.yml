@@ -10,6 +10,7 @@ services:
       SVC_ENV: 'development'
       SVC_NAME: 'demo1'
       SVC_PORT: '4567'
+      CONFIG_TID: ${CONFIG_TID:-}
       AWS_DEFAULT_REGION: 'local'
     ports:
       - 4567:4567

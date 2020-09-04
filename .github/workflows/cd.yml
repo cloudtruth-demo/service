@@ -5,6 +5,7 @@ on: [push]
 env:
   DEPLOY_AWS_ENV_TID: ${{ secrets.DEPLOY_AWS_ENV_TID }}
   ATMOS_YML_TID: ${{ secrets.ATMOS_YML_TID }}
+  DEPLOY_SVC_DOTENV_TID: ${{ secrets.DEPLOY_SVC_DOTENV_TID }}
 
 jobs:
 
@@ -39,7 +40,9 @@ jobs:
           curl -sfL "https://ctcaas-graph.cloudtruth.com/t/${ATMOS_YML_TID}/${ENV}" > config/atmos.yml
 
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag demo1
+        run: |
+          curl -sfL "https://ctcaas-graph.cloudtruth.com/t/${DEPLOY_SVC_DOTENV_TID}/${ENV}" > .env
+          docker build . --file Dockerfile --tag demo1
 
       - name: Deploy to ECS
         run: |

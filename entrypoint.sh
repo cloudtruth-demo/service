@@ -4,6 +4,7 @@
 set -e
 
 export RACK_ENV=$SVC_ENV
+export APP_ENV=$SVC_ENV
 
 function setup_env {
   if [[ -z $AWS_DEFAULT_REGION ]]; then

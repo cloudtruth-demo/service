@@ -46,5 +46,5 @@ jobs:
 
       - name: Deploy to ECS
         run: |
-          source <(curl -sfL https://ctcaas-graph.cloudtruth.com/t/${DEPLOY_AWS_ENV_TID}/${ENV} | cat)
+          source <(curl -sfL https://ctcaas-graph.cloudtruth.com/t/${DEPLOY_AWS_ENV_TID}/${ENV} | sed 's/&quot;//g' | cat)
           atmos -e ${ENV} container deploy -c ctdemo-${ENV}-services -i demo1 ctdemo-${ENV}-demo1

@@ -22,7 +22,7 @@ end
 
 def live_config
   begin
-    url = "https://ctcaas-graph.cloudtruth.com/t/#{config_tid}/#{environment}"
+    url = "https://api.cloudtruth.com/t/#{config_tid}/#{environment}"
     return JSON.parse(open(url).read)
   rescue Exception => e
     return {"live_config_error" => "#{e.class}: #{e.message}"}

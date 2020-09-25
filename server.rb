@@ -39,7 +39,7 @@ get '/' do
       env: env
   })
 
-  data = data.merge(live_config)
+  data[:live_config] = live_config
 
   json(data)
 end

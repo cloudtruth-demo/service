@@ -24,7 +24,7 @@ jobs:
           else
             env="development"
           fi
-          echo "::set-env name=ENV::${env}"
+          echo "ENV=${env}" >> $GITHUB_ENV
 
       - name: Set up Ruby
         uses: actions/setup-ruby@v1

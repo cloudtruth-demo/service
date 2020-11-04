@@ -3,9 +3,7 @@ name: CD
 on: [push]
 
 env:
-  DEPLOY_AWS_ENV_TID: ${{ secrets.DEPLOY_AWS_ENV_TID }}
-  ATMOS_YML_TID: ${{ secrets.ATMOS_YML_TID }}
-  DEPLOY_SVC_DOTENV_TID: ${{ secrets.DEPLOY_SVC_DOTENV_TID }}
+  CT_API_KEY: ${{ secrets.CT_API_KEY }}
 
 jobs:
 
@@ -31,20 +29,26 @@ jobs:
         with:
           ruby-version: 2.7
 
+      - name: Install cloudtruth cli
+        run: |
+          # Temporarily in s3 till we publish https://github.com/cloudtruth/cloudtruth-cli
+          curl https://ctdemo-development-sample-data.s3.amazonaws.com/bin/cloudtruth -o /tmp/cloudtruth
+          chmod +x /tmp/cloudtruth
+
       - name: Install Atmos
         run: gem install --no-document simplygenius-atmos
 
       - name: Setup Atmos
         run: |
           mkdir -p config
-          curl -sfL "https://api.cloudtruth.com/t/${ATMOS_YML_TID}/${ENV}" > config/atmos.yml
+          /tmp/cloudtruth -e ${ENV} template get atmos_yml > config/atmos.yml
 
       - name: Build the Docker image
         run: |
-          curl -sfL "https://api.cloudtruth.com/t/${DEPLOY_SVC_DOTENV_TID}/${ENV}" > .env
+          /tmp/cloudtruth -e ${ENV} template get deploy.service_dotenv  > .env
           docker build . --file Dockerfile --tag demo1
 
       - name: Deploy to ECS
         run: |
-          source <(curl -sfL https://api.cloudtruth.com/t/${DEPLOY_AWS_ENV_TID}/${ENV} | sed 's/&quot;//g' | cat)
+          source <(/tmp/cloudtruth -e ${ENV} template get deploy.aws_credentials_env)
           atmos -e ${ENV} container deploy -c ctdemo-${ENV}-services -i demo1 ctdemo-${ENV}-demo1

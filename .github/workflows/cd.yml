@@ -32,7 +32,7 @@ jobs:
       - name: Install cloudtruth cli
         run: |
           # Temporarily in s3 till we publish https://github.com/cloudtruth/cloudtruth-cli
-          curl https://ctdemo-development-sample-data.s3.amazonaws.com/bin/cloudtruth -o /tmp/cloudtruth
+          curl -Lsf https://ctdemo-development-sample-data.s3.amazonaws.com/bin/cloudtruth -o /tmp/cloudtruth
           chmod +x /tmp/cloudtruth
 
       - name: Install Atmos
@@ -52,3 +52,21 @@ jobs:
         run: |
           source <(/tmp/cloudtruth -e ${ENV} template get deploy.aws_credentials_env)
           atmos -e ${ENV} container deploy -c ctdemo-${ENV}-services -i demo1 ctdemo-${ENV}-demo1
+
+      - name: Install kubectl
+        run: |
+          curl -Lsf https://storage.googleapis.com/kubernetes-release/release/v1.18.0/bin/linux/amd64/kubectl -o /tmp/kubectl
+          chmod +x /tmp/kubectl
+
+      - name: Deploy to EKS
+        run: |
+          source <(/tmp/cloudtruth -e ${ENV} template get deploy.aws_credentials_env)
+          kubecfg=$(/tmp/cloudtruth -e ${ENV} template get deploy.services.kubecfg)
+
+          # Update configmap
+          /tmp/cloudtruth -e ${ENV} template get deploy.service_demo2_configmap | \
+            /tmp/kubectl --kubeconfig=<(echo "$kubecfg") apply -f -
+
+          # Apply deployment yml
+          /tmp/cloudtruth -e ${ENV} template get deploy.service_demo2_kube_yml | \
+            /tmp/kubectl --kubeconfig=<(echo "$kubecfg") apply -f -

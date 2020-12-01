@@ -31,9 +31,8 @@ jobs:
 
       - name: Install cloudtruth cli
         run: |
-          # Temporarily in s3 till we publish https://github.com/cloudtruth/cloudtruth-cli
-          curl -Lsf https://ctdemo-development-sample-data.s3.amazonaws.com/bin/cloudtruth -o /tmp/cloudtruth
-          chmod +x /tmp/cloudtruth
+          curl -Lsf https://github.com/cloudtruth/cloudtruth-cli/releases/download/0.1.0/cloudtruth_0.1.0_amd64.deb  -o /tmp/cloudtruth.deb
+          sudo dpkg -i /tmp/cloudtruth.deb
 
       - name: Install Atmos
         run: gem install --no-document simplygenius-atmos
@@ -41,16 +40,16 @@ jobs:
       - name: Setup Atmos
         run: |
           mkdir -p config
-          /tmp/cloudtruth -e ${ENV} template get atmos_yml > config/atmos.yml
+          cloudtruth -e ${ENV} template get atmos_yml > config/atmos.yml
 
       - name: Build the Docker image
         run: |
-          /tmp/cloudtruth -e ${ENV} template get deploy.service_dotenv  > .env
+          cloudtruth -e ${ENV} template get deploy.service_dotenv  > .env
           docker build . --file Dockerfile --tag demo1
 
       - name: Deploy to ECS
         run: |
-          source <(/tmp/cloudtruth -e ${ENV} template get deploy.aws_credentials_env)
+          source <(cloudtruth -e ${ENV} template get deploy.aws_credentials_env)
           atmos -e ${ENV} container deploy -c ctdemo-${ENV}-services -i demo1 ctdemo-${ENV}-demo1
 
       - name: Install kubectl
@@ -60,13 +59,13 @@ jobs:
 
       - name: Deploy to EKS
         run: |
-          source <(/tmp/cloudtruth -e ${ENV} template get deploy.aws_credentials_env)
-          kubecfg=$(/tmp/cloudtruth -e ${ENV} template get deploy.services.kubecfg)
+          source <(cloudtruth -e ${ENV} template get deploy.aws_credentials_env)
+          kubecfg=$(cloudtruth -e ${ENV} template get deploy.services.kubecfg)
 
           # Update configmap
-          /tmp/cloudtruth -e ${ENV} template get deploy.service_demo2_configmap | \
+          cloudtruth -e ${ENV} template get deploy.service_demo2_configmap | \
             /tmp/kubectl --kubeconfig=<(echo "$kubecfg") apply -f -
 
           # Apply deployment yml
-          /tmp/cloudtruth -e ${ENV} template get deploy.service_demo2_kube_yml | \
+          cloudtruth -e ${ENV} template get deploy.service_demo2_kube_yml | \
             /tmp/kubectl --kubeconfig=<(echo "$kubecfg") apply -f -

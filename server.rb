@@ -45,13 +45,10 @@ def live_config
 end
 
 get '/' do
-  name = ENV['SVC_NAME']
-  env = ENV['SVC_ENV']
-
-  my_env_config = ENV.to_h.select {|k, v| k =~ /^#{name.upcase}/ }.merge(live_config)
+  my_env_config = ENV.to_h.select {|k, v| k =~ /^#{project.upcase}/ }.merge(live_config)
   data = my_env_config.merge ({
-      name: name,
-      env: env
+      name: project,
+      env: environment
   })
 
   json(data)

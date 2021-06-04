@@ -28,7 +28,7 @@ function start_app {
 
   maybe_cloudtruth=""
   if [[ "$SVC_ENV" != "local" ]]; then
-    maybe_cloudtruth="cloudtruth run --"
+    maybe_cloudtruth="cloudtruth run -p --"
   fi
 
   exec $maybe_cloudtruth bundle exec ruby server.rb -o 0.0.0.0 -p $SVC_PORT

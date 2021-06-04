@@ -40,6 +40,7 @@ def live_config
   rescue Exception => e
     msg = "#{e.class}: #{e.message}"
     $stderr.puts "Failure fetching config: #{msg}"
+    $stderr.puts e.backtrace
     return {"live_config_error" => msg}
   end
 end

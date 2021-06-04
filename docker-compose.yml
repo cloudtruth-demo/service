@@ -7,10 +7,10 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      SVC_ENV: 'development'
       SVC_NAME: 'demo1'
+      SVC_ENV: 'local'
       SVC_PORT: '4567'
-      CONFIG_TID: ${CONFIG_TID:-}
+      CLOUDTRUTH_API_KEY: ${CLOUDTRUTH_API_KEY:-}
       AWS_DEFAULT_REGION: 'local'
     ports:
       - 4567:4567

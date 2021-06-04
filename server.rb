@@ -5,6 +5,9 @@ require "sinatra/reloader" if development?
 require 'dotenv'
 require 'open-uri'
 
+$LOAD_PATH.unshift File.dirname(__FILE__)
+require 'ctapi'
+
 Dotenv.load('.env.local', '.env')
 
 set :allow_origin, "*"
@@ -12,18 +15,21 @@ set :allow_methods, "GET,HEAD,POST"
 set :allow_headers, "content-type,if-modified-since"
 set :expose_headers, "location,link"
 
-def config_tid
-  ENV['CONFIG_TID']
-end
-
 def environment
   ENV['SVC_ENV']
 end
 
+def ctapi
+  @ctapi ||= begin
+    @ctapi_class = CtApi(api_key: ENV['CLOUDTRUTH_API_KEY'])
+    @ctapi_class.new(environment: environment)
+  end
+end
+
 def live_config
   begin
-    url = "https://api.cloudtruth.com/t/#{config_tid}/#{environment}"
-    return JSON.parse(open(url).read)
+    params = ctapi.parameters(project: ENV['CLOUDTRUTH_PROJECT'])
+    return Hash[params.collect {|p| [p.key, p.value] }]
   rescue Exception => e
     return {"live_config_error" => "#{e.class}: #{e.message}"}
   end
@@ -32,14 +38,12 @@ end
 get '/' do
   name = ENV['SVC_NAME']
   env = ENV['SVC_ENV']
-  my_env_config = ENV.select {|k, v| k =~ /^#{name.upcase}/ }
+  my_env_config = ENV.to_h.merge(live_config).select {|k, v| k =~ /^#{name.upcase}/ }
 
   data = my_env_config.merge ({
       name: name,
       env: env
   })
-
-  data[:live_config] = live_config
 
   json(data)
 end

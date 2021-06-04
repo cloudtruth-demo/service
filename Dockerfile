@@ -3,7 +3,7 @@ FROM ruby:2.7.1
 ARG app_user_uid=61000
 ARG app_user_gid=61000
 
-ENV SVC_NAME = "demo1" \
+ENV SVC_NAME="demo1" \
     SVC_ENV="production" \
     SVC_PORT="8888" \
     SVC_DIR="/srv/app" \

@@ -56,3 +56,7 @@ get '/' do
 
   json(data)
 end
+
+get '/health_check' do
+  "OK"
+end

@@ -7,7 +7,6 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      SVC_NAME: 'demo1'
       SVC_ENV: 'local'
       SVC_PORT: '4567'
       CLOUDTRUTH_API_KEY: ${CLOUDTRUTH_API_KEY:-}

@@ -58,7 +58,7 @@ jobs:
 
       - name: Ensure cloudtruth contains all the parameters defined in .env
         run: |
-          docker run -e CLOUDTRUTH_API_KEY=${CLOUDTRUTH_API_KEY} -e SVC_NAME=demo1 -e SVC_ENV=default demo1 ctsync
+          docker run -e CLOUDTRUTH_API_KEY=${CLOUDTRUTH_API_KEY} -e SVC_ENV=default demo1 ctsync
 
       - name: Deploy to ECS
         run: |

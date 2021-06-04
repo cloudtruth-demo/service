@@ -5,15 +5,13 @@ set -e
 
 export RACK_ENV=$SVC_ENV
 export APP_ENV=$SVC_ENV
+export CLOUDTRUTH_ENVIRONMENT=${CLOUDTRUTH_ENVIRONMENT:-${SVC_ENV}}
 
 function setup_env {
   if [[ -z $AWS_DEFAULT_REGION ]]; then
     export AVAILABILITY_ZONE="$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)"
     export AWS_DEFAULT_REGION="$(echo $AVAILABILITY_ZONE | sed -e 's/[a-z]$//')"
   fi
-
-  export CLOUDTRUTH_PROJECT=${CLOUDTRUTH_PROJECT:-service-${SVC_NAME}}
-  export CLOUDTRUTH_ENVIRONMENT=${CLOUDTRUTH_ENVIRONMENT:-${SVC_ENV}}
 }
 export -f setup_env
 
@@ -42,14 +40,16 @@ function update_cloudtruth_rb {
 
   ruby  <(
   cat <<-EOF
+    puts "Updating cloudtruth params for project '#{ENV['CLOUDTRUTH_PROJECT']}' in environment '#{ENV['CLOUDTRUTH_ENVIRONMENT']}'"
+
     existing_params = %x(cloudtruth param ls | grep -v "No parameters found").lines(chomp: true)
     local_params_data = File.read(".env").lines(chomp: true).reject{|l| l=~ /^\s*#/ }
     local_params = Hash[local_params_data.collect {|l| l.split(/\s*=\s*/) }]
     new_params = local_params.keys - existing_params
     new_params.each do |param|
       value = local_params[param]
-      puts "Adding new param '#{param}=#{value}' to cloudtruth default"
-      system("cloudtruth -e default param set '#{param}' -v '#{value}'")
+      puts "Adding new param '#{param}=#{value}' to cloudtruth"
+      system("cloudtruth param set '#{param}' -v '#{value}'")
     end
 EOF
   )
@@ -63,7 +63,7 @@ function update_cloudtruth {
   declare new_params=($(printf '%s\n' "${existing_params[@]}" "${existing_params[@]}" "${local_params[@]}" | sort | uniq -u))
   for param in ${new_params[@]}; do
     value=$(awk -F= "/^${param}=/ {print \$2}" .env)
-    echo "Adding new param '${param}=${value}' to cloudtruth default"
+    echo "Adding new param '${param}=${value}' to cloudtruth"
     cloudtruth param set "$param" -v "$value"
   done
 }

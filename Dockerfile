@@ -3,10 +3,11 @@ FROM ruby:2.7.1
 ARG app_user_uid=61000
 ARG app_user_gid=61000
 
-ENV SVC_NAME="service" \
+ENV SVC_NAME = "demo1" \
     SVC_ENV="production" \
     SVC_PORT="8888" \
     SVC_DIR="/srv/app" \
+    CLOUDTRUTH_PROJECT="service-demo1" \
     BUNDLE_PATH="/srv/bundler" \
     BUILD_PACKAGES="" \
     APP_PACKAGES="bash curl less vim netcat tzdata apt-utils locales" \

@@ -55,7 +55,9 @@ jobs:
           # current data into the process environment at startup time
           #
           docker build . --file Dockerfile --tag demo1
-          # Update .env contents to cloudtruth parameters for the default env
+
+      - name: Ensure cloudtruth contains all the parameters defined in .env
+        run: |
           docker run -e CLOUDTRUTH_API_KEY=${CLOUDTRUTH_API_KEY} -e SVC_NAME=demo1 -e SVC_ENV=default demo1 ctsync
 
       - name: Deploy to ECS

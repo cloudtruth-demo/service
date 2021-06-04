@@ -1,3 +1,5 @@
+$stdout.sync = true
+
 require 'sinatra'
 require 'sinatra/json'
 require "sinatra/cors"
@@ -19,6 +21,10 @@ def environment
   ENV['SVC_ENV']
 end
 
+def project
+  ENV['CLOUDTRUTH_PROJECT']
+end
+
 def ctapi
   @ctapi ||= begin
     @ctapi_class = CtApi(api_key: ENV['CLOUDTRUTH_API_KEY'])
@@ -28,18 +34,21 @@ end
 
 def live_config
   begin
-    params = ctapi.parameters(project: ENV['CLOUDTRUTH_PROJECT'])
+    puts "Fetching config from cloudtruth project '#{project}' for environment '#{environment}'"
+    params = ctapi.parameters(project: project)
     return Hash[params.collect {|p| [p.key, p.value] }]
   rescue Exception => e
-    return {"live_config_error" => "#{e.class}: #{e.message}"}
+    msg = "#{e.class}: #{e.message}"
+    $stderr.puts "Failure fetching config: #{msg}"
+    return {"live_config_error" => msg}
   end
 end
 
 get '/' do
   name = ENV['SVC_NAME']
   env = ENV['SVC_ENV']
-  my_env_config = ENV.to_h.merge(live_config).select {|k, v| k =~ /^#{name.upcase}/ }
 
+  my_env_config = ENV.to_h.select {|k, v| k =~ /^#{name.upcase}/ }.merge(live_config)
   data = my_env_config.merge ({
       name: name,
       env: env

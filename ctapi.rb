@@ -1,9 +1,10 @@
+require 'active_support'
 require "graphql/client"
 require "graphql/client/http"
 
 Parameter = Struct.new(:key, :value, :secret, :original_key, keyword_init: true)
 
-def self.CtApi(api_key:, api_url: nil)
+def CtApi(api_key:, api_url: nil)
   api_url ||= "https://api.cloudtruth.com/graphql"
 
   clazz = Class.new do
@@ -13,7 +14,7 @@ def self.CtApi(api_key:, api_url: nil)
 
     self.http = ::GraphQL::Client::HTTP.new(api_url) do
       define_method :headers do |context = {}|
-        { "User-Agent": "kubetruth/#{Kubetruth::VERSION}", "Authorization": "Bearer #{api_key}" }
+        { "User-Agent": "demosvc/0.0.0", "Authorization": "Bearer #{api_key}" }
       end
     end
     self.schema = ::GraphQL::Client.load_schema(http)
@@ -149,7 +150,7 @@ def self.CtApi(api_key:, api_url: nil)
       result = client.query(self.queries[:ParametersQuery], variables: variables)
 
       result&.data&.viewer&.organization&.project&.parameters&.nodes&.collect do |e|
-        Kubetruth::Parameter.new(key: e.key_name, value: e.environment_value.parameter_value, secret: e.is_secret)
+        Parameter.new(key: e.key_name, value: e.environment_value.parameter_value, secret: e.is_secret)
       end
     end
 
@@ -157,7 +158,7 @@ def self.CtApi(api_key:, api_url: nil)
 
   @ident ||= 0
   @ident += 1
-  Kubetruth.const_set(:"CtApi_#{@ident}", clazz)
+  Object.const_set(:"CtApi_#{@ident}", clazz)
 
   return clazz
 end

@@ -3,9 +3,11 @@ FROM ruby:2.7.1
 ARG app_user_uid=61000
 ARG app_user_gid=61000
 
-ENV SVC_ENV="production" \
+ENV SVC_NAME="demo1" \
+    SVC_ENV="production" \
     SVC_PORT="8888" \
     SVC_DIR="/srv/app" \
+    CLOUDTRUTH_PROJECT="service-demo1" \
     BUNDLE_PATH="/srv/bundler" \
     BUILD_PACKAGES="" \
     APP_PACKAGES="bash curl less vim netcat tzdata apt-utils locales" \
@@ -38,6 +40,9 @@ RUN curl -Lo /tmp/tmate.tar.xz https://github.com/tmate-io/tmate/releases/downlo
     tar xf /tmp/tmate.tar.xz && \
     mv tmate-2.4.0-static-linux-amd64/tmate /usr/bin/tmate && \
     rm -rf /tmp/tmate*
+
+# Install cloudtruth cli
+RUN (curl -sL https://github.com/cloudtruth/cloudtruth-cli/releases/latest/download/install.sh || wget -qO- https://github.com/cloudtruth/cloudtruth-cli/releases/latest/download/install.sh) |  sh
 
 RUN gem install bundler
 COPY Gemfile* $SVC_DIR/

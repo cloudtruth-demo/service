@@ -7,8 +7,7 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
-    backports (3.18.1)
-    concurrent-ruby (1.1.8)
+    concurrent-ruby (1.1.9)
     dotenv (2.7.6)
     graphql (1.12.12)
     graphql-client (0.16.0)
@@ -21,22 +20,22 @@ GEM
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
     rack (2.2.3)
-    rack-protection (2.0.8.1)
+    rack-cors (1.1.1)
+      rack (>= 2.0.0)
+    rack-protection (2.1.0)
       rack
-    ruby2_keywords (0.0.2)
-    sinatra (2.0.8.1)
+    ruby2_keywords (0.0.4)
+    sinatra (2.1.0)
       mustermann (~> 1.0)
-      rack (~> 2.0)
-      rack-protection (= 2.0.8.1)
+      rack (~> 2.2)
+      rack-protection (= 2.1.0)
       tilt (~> 2.0)
-    sinatra-contrib (2.0.8.1)
-      backports (>= 2.8.2)
+    sinatra-contrib (2.1.0)
       multi_json
       mustermann (~> 1.0)
-      rack-protection (= 2.0.8.1)
-      sinatra (= 2.0.8.1)
+      rack-protection (= 2.1.0)
+      sinatra (= 2.1.0)
       tilt (~> 2.0)
-    sinatra-cors (1.2.0)
     tilt (2.0.10)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
@@ -49,9 +48,9 @@ DEPENDENCIES
   activesupport
   dotenv
   graphql-client
+  rack-cors
   sinatra
   sinatra-contrib
-  sinatra-cors
 
 BUNDLED WITH
    2.1.4

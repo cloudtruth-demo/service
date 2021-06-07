@@ -156,9 +156,5 @@ def CtApi(api_key:, api_url: nil)
 
   end
 
-  @ident ||= 0
-  @ident += 1
-  Object.const_set(:"CtApi_#{@ident}", clazz)
-
   return clazz
 end

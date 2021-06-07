@@ -2,7 +2,6 @@ $stdout.sync = true
 
 require 'sinatra'
 require 'sinatra/json'
-require "sinatra/cors"
 require "sinatra/reloader" if development?
 require 'dotenv'
 require 'open-uri'
@@ -12,10 +11,14 @@ require 'ctapi'
 
 Dotenv.load('.env.local', '.env')
 
-set :allow_origin, "*"
-set :allow_methods, "GET,HEAD,POST"
-set :allow_headers, "content-type,if-modified-since"
-set :expose_headers, "location,link"
+require 'rack/cors'
+use Rack::Cors do
+  allow do
+    origins '*'
+    resource '*',  headers: :any, methods: [:get, :options, :head]
+  end
+end
+set :protection, :except => [:json_csrf]
 
 def environment
   ENV['SVC_ENV']
